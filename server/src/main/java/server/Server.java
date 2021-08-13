@@ -9,7 +9,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class Server {
     private ServerSocket server;
     private Socket socket;
-    private final int PORT = 8189;
+    private final int PORT = 8191;
 
     private List<ClientHandler> clients;
     private AuthService authService;
@@ -42,6 +42,20 @@ public class Server {
         for (ClientHandler c : clients) {
             c.sendMsg(message);
         }
+    }
+
+    public void privateMsg(ClientHandler sender, String receiver, String msg) {
+        String message = String.format("[ %s ] to [ %s ] : %s", sender.getNickname(), receiver, msg);
+        for (ClientHandler c : clients) {
+            if (c.getNickname().equals(receiver)) {
+                c.sendMsg(message);
+                if(!c.equals(sender)) {
+                    sender.sendMsg(message);
+                }
+                return;
+            }
+        }
+        sender.sendMsg("Not found user: " + receiver);
     }
 
     public void subscribe(ClientHandler clientHandler){
